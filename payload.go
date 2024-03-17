@@ -15,8 +15,9 @@ import (
 
 	humanize "github.com/dustin/go-humanize"
 	"github.com/golang/protobuf/proto"
-	xz "github.com/spencercw/go-xz"
+
 	"github.com/ssut/payload-dumper-go/chromeos_update_engine"
+	xzn "github.com/ulikunitz/xz" //xz "github.com/spencercw/go-xz"
 	"github.com/vbauerster/mpb/v5"
 	"github.com/vbauerster/mpb/v5/decor"
 )
@@ -264,12 +265,13 @@ func (p *Payload) Extract(partition *chromeos_update_engine.PartitionUpdate, out
 			break
 
 		case chromeos_update_engine.InstallOperation_REPLACE_XZ:
-			reader := xz.NewDecompressionReader(teeReader)
-			n, err := io.Copy(out, &reader)
+			//reader := xz.NewDecompressionReader(teeReader)
+			reader2, _ := xzn.NewReader(teeReader)
+			n, err := io.Copy(out, reader2)
 			if err != nil {
 				return err
 			}
-			reader.Close()
+			//reader.Close()
 			if n != expectedUncompressedBlockSize {
 				return fmt.Errorf("Verify failed (Unexpected bytes written): %s (%d != %d)", name, n, expectedUncompressedBlockSize)
 			}
@@ -356,7 +358,9 @@ func (p *Payload) ExtractSelected(targetDirectory string, partitions []string) e
 				continue
 			}
 		}
-
+		if *partition.PartitionName != "init_boot" { //fmt.Print(*partition.PartitionName)
+			continue
+		} //GitCsw Add: only dump init_boot.img
 		p.workerWG.Add(1)
 		p.requests <- &request{
 			partition:       partition,

@@ -1,6 +1,9 @@
 # payload-dumper-go
 
 An android OTA payload dumper written in Go.
+GitCsw Edit:
+- Add code to export only the set image file
+- Change xz mod("github.com/spencercw/go-xz" -> "github.com/ulikunitz/xz")
 
 ## Features
 
